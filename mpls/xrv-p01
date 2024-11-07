@@ -1,2 +1,171 @@
+RP/0/0/CPU0:P01#show run
+Thu Nov  7 07:03:43.887 UTC
+Building configuration...
+!! IOS XR Configuration 5.2.2
+!! Last configuration change at Sat Nov  2 16:51:45 2024 by cisco
+!
+hostname P01
+interface Loopback0
+ ipv4 address 10.172.131.1 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ shutdown
+!
+interface GigabitEthernet0/0/0/0
+ description TO-P05
+ ipv4 address 10.172.129.254 255.255.255.252
+!
+interface GigabitEthernet0/0/0/1
+ description TO-P04
+ ipv4 address 10.172.125.2 255.255.255.252
+!
+interface GigabitEthernet0/0/0/2
+ shutdown
+!
+interface GigabitEthernet0/0/0/3
+ shutdown
+!
+interface GigabitEthernet0/0/0/4
+ description TO-P02
+ ipv4 address 10.172.130.10 255.255.255.252
+!
+interface GigabitEthernet0/0/0/5
+ description TO-P03
+ ipv4 address 10.172.126.250 255.255.255.252
+!
+interface GigabitEthernet0/0/0/6
+ shutdown
+!
+interface GigabitEthernet0/0/0/7
+ shutdown
+!
+interface GigabitEthernet0/0/0/8
+ shutdown
+!
+interface GigabitEthernet0/0/0/9
+ shutdown
+!
+interface GigabitEthernet0/0/0/10
+ shutdown
+!
+interface GigabitEthernet0/0/0/11
+ shutdown
+!
+interface GigabitEthernet0/0/0/12
+ shutdown
+!
+interface GigabitEthernet0/0/0/13
+ shutdown
+!
+interface GigabitEthernet0/0/0/14
+ shutdown
+!
+router isis 10
+ is-type level-2-only
+ net 10.0101.7213.1001.00
+ log adjacency changes
+ max-lsp-lifetime 65535
+ address-family ipv4 unicast
+  metric-style wide level 2
+  metric 10
+  mpls traffic-eng level-2-only
+  mpls traffic-eng router-id Loopback0
+  mpls ldp auto-config
+ !
+ interface Loopback0
+  passive
+  address-family ipv4 unicast
+  !
+ !
+ interface GigabitEthernet0/0/0/0
+  circuit-type level-2-only
+  point-to-point
+  hello-padding disable
+  address-family ipv4 unicast
+   metric 10
+   mpls ldp sync
+  !
+ !
+ interface GigabitEthernet0/0/0/1
+  circuit-type level-2-only
+  point-to-point
+  hello-padding disable
+  address-family ipv4 unicast
+   metric 10
+   mpls ldp sync
+  !
+ !
+ interface GigabitEthernet0/0/0/4
+  circuit-type level-2-only
+  point-to-point
+  hello-padding disable
+  address-family ipv4 unicast
+   metric 10
+   mpls ldp sync
+  !
+ !
+ interface GigabitEthernet0/0/0/5
+  circuit-type level-2-only
+  point-to-point
+  hello-padding disable
+  address-family ipv4 unicast
+   metric 10
+   mpls ldp sync
+  !
+ !
+!
+mpls oam
+!
+rsvp
+ interface GigabitEthernet0/0/0/0
+  bandwidth
+ !
+ interface GigabitEthernet0/0/0/1
+  bandwidth
+ !
+ interface GigabitEthernet0/0/0/4
+  bandwidth
+ !
+ interface GigabitEthernet0/0/0/5
+  bandwidth
+ !
+!
+mpls traffic-eng
+ interface GigabitEthernet0/0/0/0
+ !
+ interface GigabitEthernet0/0/0/1
+ !
+ ! interface GigabitEthernet0/0/0/4
+ interface GigabitEthernet0/0/0/5
+ !
+!
+mpls ldp
+ log
+  neighbor
+  nsr
+  graceful-restart
+ !
+ graceful-restart reconnect-timeout 60
+ router-id 10.172.131.1
+ address-family ipv4
+  discovery targeted-hello accept
+  traffic-eng
+   auto-tunnel mesh
+    group all
+   !
+  !
+ !
+ interface GigabitEthernet0/0/0/0
+ !
+ interface GigabitEthernet0/0/0/1
+ !
+ interface GigabitEthernet0/0/0/4
+ !
+ interface GigabitEthernet0/0/0/5
+ !
+!
+lldp
+!
+end
 
-testttttt
+RP/0/0/CPU0:P01#         
