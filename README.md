@@ -1,2 +1,1 @@
-NETWORK
-~~~~~~~~~~~~~~~~~~~mini repository about network configuration~~~~~~~~~~~~~~~~~~~
+# mini repository about network configuration
