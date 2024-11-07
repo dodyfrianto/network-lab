@@ -1,2 +1,1 @@
-@day.2024
-~ mini repository on network configuration
+~ a mini repository for network configuration ~
