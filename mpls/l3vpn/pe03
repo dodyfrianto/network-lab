@@ -1,7 +1,7 @@
 <PE03>dis curr
 !Software Version V800R011C00SPC607B607
-!Last configuration was updated at 2024-11-07 09:33:12+00:00
-!Last configuration was saved at 2024-11-07 09:38:34+00:00
+!Last configuration was updated at 2024-11-07 12:36:39+00:00
+!Last configuration was saved at 2024-11-07 12:36:43+00:00
 #
 sysname PE03
 #
@@ -44,8 +44,20 @@ mpls
 #
 mpls l2vpn
 #
+vsi L2VPN bd-mode
+ pwsignal ldp   
+  vsi-id 500
+  flow-label both
+  peer 10.172.131.200 
+  peer 10.172.131.201 
+ encapsulation ethernet
+#
+bridge-domain 500
+ description L2VPN-SERVICE-DUMMY
+ l2 binding vsi L2VPN
+#
 mpls ldp
- #              
+ #
  ipv4-family
 #
 mpls ldp remote-peer 10.172.131.200
@@ -68,7 +80,7 @@ aaa
  accounting-scheme default0
  #
  accounting-scheme default1
- #              
+ #
  domain default0
  #
  domain default1
@@ -87,11 +99,14 @@ isis 10
  frr
   loop-free-alternate level-2
 #
+interface Vbdif500
+ ip address 10.10.10.3 255.255.255.248
+#
 interface Ethernet1/0/0
  description TO-P04
  undo shutdown
  ip address 10.172.126.10 255.255.255.252
- isis enable 10 
+ isis enable 10
  isis circuit-type p2p
  isis cost 10
  isis ldp-sync
@@ -114,7 +129,7 @@ interface Ethernet1/0/1
  isis ldp-sync
  isis bfd enable
  mpls
- mpls te        
+ mpls te
  mpls rsvp-te
  mpls rsvp-te hello
  mpls ldp
@@ -137,7 +152,7 @@ interface Ethernet1/0/3
 interface Ethernet1/0/4
  undo shutdown
  undo dcn mode vlan
-#               
+#
 interface Ethernet1/0/5
  undo shutdown
  undo dcn mode vlan
@@ -145,7 +160,7 @@ interface Ethernet1/0/5
 interface Ethernet1/0/6
  undo shutdown
  undo dcn mode vlan
-#
+#               
 interface Ethernet1/0/7
  undo shutdown
  undo dcn mode vlan
@@ -160,7 +175,7 @@ interface Ethernet1/0/9
 #
 interface GigabitEthernet0/0/0
  undo shutdown
-#               
+#
 interface LoopBack0
  ip address 10.172.131.202 255.255.255.255
  isis enable 10
@@ -168,7 +183,7 @@ interface LoopBack0
 interface LoopBack100
  ip binding vpn-instance INTERNET
  ip address 192.168.21.1 255.255.255.0
-#
+#               
 interface NULL0
 #
 bgp 71000
@@ -194,10 +209,19 @@ bgp 71000
   peer 10.172.131.201 enable
  #
  ipv4-family vpn-instance INTERNET
+  router-id 10.172.131.202
   default-route imported
   import-route direct
   import-route static
   import-route ospf 71000
+  peer 10.172.131.200 as-number 71000
+  peer 10.172.131.200 connect-interface LoopBack0
+  peer 10.172.131.200 bfd detect-multiplier 4
+  peer 10.172.131.200 bfd enable
+  peer 10.172.131.201 as-number 71000
+  peer 10.172.131.201 connect-interface LoopBack0
+  peer 10.172.131.201 bfd detect-multiplier 4
+  peer 10.172.131.201 bfd enable
 #
 ospf 71000 vpn-instance INTERNET
  default-route-advertise always
@@ -206,7 +230,7 @@ ospf 71000 vpn-instance INTERNET
  import-route bgp
  area 0.0.0.1
   network 202.61.78.248 0.0.0.3 description PTP-TO-RO-GW-INET
-#               
+#
 undo dcn
 #
 ip route-static vpn-instance INTERNET 0.0.0.0 0.0.0.0 202.61.78.250
@@ -228,6 +252,6 @@ user-interface aux 0
 local-aaa-server
 #
 vm-manager
-#
-return          
-<PE03> 
+#               
+return
+<PE03>            
