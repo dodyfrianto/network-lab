@@ -1,2 +1,1 @@
-********************* a mini repository for network configuration *********************
-
+a mini repository for network configuration
