@@ -1,1 +1,1 @@
-About network configuration
+~~~~~~~~~~~~~~~~~~~mini repository about network configuration~~~~~~~~~~~~~~~~~~~
