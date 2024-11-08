@@ -1,0 +1,280 @@
+RP/0/0/CPU0:PE02#ping 10.20.1.1
+Fri Nov  8 10:06:36.771 UTC
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.20.1.1, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+RP/0/0/CPU0:PE02#show run
+Fri Nov  8 10:16:25.220 UTC
+Building configuration...
+!! IOS XR Configuration 5.2.2
+!! Last configuration change at Fri Nov  8 10:04:08 2024 by cisco
+!
+hostname PE02
+vrf L3VPN
+ address-family ipv4 unicast
+  import route-target
+   71000:65300
+  !
+  export route-target
+   71000:65300
+  !
+ !
+!
+vrf INTERNET
+ address-family ipv4 unicast
+  import route-target
+   1:71000
+  !
+  export route-target
+   1:71000
+  !
+ !
+!
+interface Loopback0
+ ipv4 address 10.172.131.200 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ shutdown
+!
+interface GigabitEthernet0/0/0/0
+ description TO-P02
+ ipv4 address 10.172.129.2 255.255.255.252
+!
+interface GigabitEthernet0/0/0/1
+ description TO-P05
+ ipv4 address 10.172.129.6 255.255.255.252
+!
+interface GigabitEthernet0/0/0/2
+ description TO-CPE02
+!
+interface GigabitEthernet0/0/0/2.255
+ description L3VPN-CPE01-CPE02
+ vrf L3VPN
+ ipv4 address 172.16.19.89 255.255.255.252
+ encapsulation dot1q 255
+!
+interface GigabitEthernet0/0/0/2.500 l2transport
+ description L2VPN-SERVICE
+ encapsulation dot1q 500
+!
+interface GigabitEthernet0/0/0/2.999
+ description TO-INET-CPE02
+ vrf INTERNET
+ ipv4 address 100.71.123.1 255.255.255.252
+ encapsulation dot1q 999
+!
+interface GigabitEthernet0/0/0/3
+ description TO-CPE03
+!
+interface GigabitEthernet0/0/0/4
+ shutdown
+!
+interface GigabitEthernet0/0/0/5
+ shutdown
+!
+interface GigabitEthernet0/0/0/6
+ shutdown
+!
+interface GigabitEthernet0/0/0/7
+ shutdown
+!
+interface GigabitEthernet0/0/0/8
+ shutdown
+!
+interface GigabitEthernet0/0/0/9
+ shutdown
+!
+interface GigabitEthernet0/0/0/10
+ shutdown
+!
+interface GigabitEthernet0/0/0/11
+ shutdown
+!
+interface GigabitEthernet0/0/0/12
+ shutdown
+!
+interface GigabitEthernet0/0/0/13
+ shutdown
+!
+interface GigabitEthernet0/0/0/14
+ shutdown
+!
+interface BVI500
+ ipv4 address 10.20.1.1 255.255.255.248
+!
+route-policy PASS
+  pass
+end-policy
+!
+router static
+ vrf INTERNET
+  address-family ipv4 unicast
+   103.187.16.244/30 100.71.123.2
+  !
+ !
+!
+router isis 10
+ is-type level-2-only
+ net 10.0101.7213.1200.00
+ log adjacency changes
+ max-lsp-lifetime 65535
+ address-family ipv4 unicast
+  metric-style wide level 2
+  metric 10
+  mpls traffic-eng level-2-only
+  mpls traffic-eng router-id Loopback0
+  mpls ldp auto-config
+ !
+ interface Loopback0
+  passive
+  address-family ipv4 unicast
+  !
+ !
+ interface GigabitEthernet0/0/0/0
+  circuit-type level-2-only
+  point-to-point
+  hello-padding disable
+  address-family ipv4 unicast
+   metric 10
+   mpls ldp sync
+  !
+ !
+ interface GigabitEthernet0/0/0/1
+  circuit-type level-2-only
+  point-to-point
+  hello-padding disable
+  address-family ipv4 unicast
+   metric 10
+   mpls ldp sync
+  !
+ !
+!
+router bgp 71000
+ bgp router-id 10.172.131.200
+ bgp log neighbor changes detail
+ address-family ipv4 unicast
+  network 10.172.131.200/32
+ !
+ address-family vpnv4 unicast
+ !
+ neighbor 10.172.131.201
+  remote-as 71000
+  description TO-PE01
+  update-source Loopback0
+  address-family ipv4 unicast
+   next-hop-self
+   soft-reconfiguration inbound always
+  !
+  address-family vpnv4 unicast
+   next-hop-self
+   soft-reconfiguration inbound always
+  !
+ !
+ neighbor 10.172.131.202
+  remote-as 71000
+  description TO-PE03
+  update-source Loopback0
+  address-family ipv4 unicast
+   next-hop-self
+   soft-reconfiguration inbound always
+  !
+  address-family vpnv4 unicast
+   next-hop-self
+   soft-reconfiguration inbound always
+  !
+ !
+ vrf L3VPN
+  rd 71000:65300
+  address-family ipv4 unicast
+   redistribute connected
+   redistribute static
+  !
+  neighbor 172.16.19.90
+   remote-as 65300
+   address-family ipv4 unicast
+    route-policy PASS in
+    route-policy PASS out
+    next-hop-self
+    soft-reconfiguration inbound always
+   !
+  !
+ !
+ vrf INTERNET
+  rd 1:71000
+  address-family ipv4 unicast
+   redistribute connected
+   redistribute static
+  !
+ !
+!
+l2vpn
+ router-id 10.172.131.200
+ pw-class VFI-L2VPN
+  encapsulation mpls
+   transport-mode ethernet
+  !
+ !
+ bridge group L2VPN
+  bridge-domain L2VPN
+   flooding disable
+   mtu 1500
+   interface GigabitEthernet0/0/0/2.500
+    static-mac-address 0001.0001.0001
+   !
+   vfi L2VPN
+    neighbor 10.172.131.201 pw-id 500
+     pw-class VFI-L2VPN
+    !
+    neighbor 10.172.131.202 pw-id 500
+     pw-class VFI-L2VPN
+    !
+   !
+   routed interface BVI500
+  !
+ !
+!
+mpls oam
+!
+rsvp
+ interface GigabitEthernet0/0/0/0
+  bandwidth
+ !
+ interface GigabitEthernet0/0/0/1
+  bandwidth
+ !
+!
+mpls traffic-eng
+ interface GigabitEthernet0/0/0/0
+ !
+ interface GigabitEthernet0/0/0/1
+ !
+!
+mpls ldp
+ log
+  neighbor
+  nsr
+  graceful-restart
+ !
+ graceful-restart reconnect-timeout 60
+ router-id 10.172.131.200
+ address-family ipv4
+  discovery targeted-hello accept
+  neighbor 10.172.131.201 targeted
+  neighbor 10.172.131.202 targeted
+  traffic-eng
+   auto-tunnel mesh
+    group all
+   !
+  !
+ !
+ interface GigabitEthernet0/0/0/0
+ !
+ interface GigabitEthernet0/0/0/1
+ !
+!
+lldp
+!
+end
+
+RP/0/0/CPU0:PE02#    
